@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<script id="vertex-shader" type="x-shader/x-vertex">#version 300 es
+
+in vec2 aPosition;
+
+out vec3 fColor;
+
+//uniform vec4 uColor;
+//uniform mat4 modelViewMatrix;
+//uniform mat4 projectionMatrix;
+
+void main()
+{
+	fColor = vec3(aPosition * 0.5 + 0.5, 1.0);
+	gl_Position = vec4(aPosition, 0.0, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">#version 300 es
+precision highp float;
+
+in vec3 fColor;
+out vec4 outColor;
+
+void main()
+{
+	outColor = vec4(fColor, 1);
+}
+</script>
+
+<script type="text/javascript" src="js/webgl-debug-helper.js"></script>
+<script type="text/javascript" src="js/webgl-utils.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
+
+<style>
+	#gl-canvas {
+		outline: black 2px solid;
+	}
+</style>

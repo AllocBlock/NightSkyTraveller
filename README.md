@@ -48,3 +48,7 @@
   - 天文数据格式很多...
 
 ## 2 渲染
+- API
+  - WebGL2.0
+    - 检测是否支持：http://get.webgl.org/webgl2/
+    - 教程：https://webgl2fundamentals.org/webgl/lessons/zh_cn/
