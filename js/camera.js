@@ -18,9 +18,7 @@ export default class PerspectiveCamera {
 
     getProjMat(aspect) {
         let fovRadian = this.fov / (2 * Math.PI)
-        let projMat = m4.perspective(fovRadian, aspect, this.near, this.far);
-        projMat[5] *= -1; // reverse y
-        return projMat
+        return m4.perspective(fovRadian, aspect, this.near, this.far);
     }
 
     getViewProjMat(aspect) {

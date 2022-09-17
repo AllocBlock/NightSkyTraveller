@@ -86,7 +86,6 @@ export default class Interactor {
 
         // view
         {
-            const front = this.camera.getFront()
             const left = this.camera.getLeft()
             const up = this.camera.getUp()
             let rotateLeft = 0.0, rotateUp = 0.0;
@@ -98,7 +97,7 @@ export default class Interactor {
             let newTarget = this.camera.target
             const position = this.camera.position
             let m = m4.axisRotation(up, rotateLeft * this.viewSpeed * deltaTime)
-            m = m4.axisRotate(m, left, rotateUp * this.viewSpeed * deltaTime)
+            m = m4.axisRotate(m, left, -rotateUp * this.viewSpeed * deltaTime)
             newTarget = m4.subtractVectors(newTarget, position)
             newTarget = m4.transformVector(m, [...newTarget, 0.0])
             newTarget = m4.addVectors(newTarget.slice(0, 3), position)
