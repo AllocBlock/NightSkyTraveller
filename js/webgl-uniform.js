@@ -32,6 +32,12 @@ export default class WebGLUniform {
         gl.uniform1f(location, value);
     }
 
+    updateVec2(name, value) {
+        assert(value.length == 2, "Value is not vec1")
+        let location = this.getLocation(name)
+        gl.uniform2fv(location, value);
+    }
+
     updateVec3(name, value) {
         assert(value.length == 3, "Value is not vec3")
         let location = this.getLocation(name)

@@ -9,7 +9,7 @@ const gUniform = new WebGLUniform();
 const gScene = new Scene();
 
 function createScene() {
-    gScene.addObject(gl.TRIANGLES, [[-1, -1, 0], [3, -1, 0], [-1, 3, 0]]);
+    // gScene.addObject(gl.TRIANGLES, [[-1, -1, 0], [3, -1, 0], [-1, 3, 0]]);
 
     // random points
     let points = []
@@ -50,7 +50,7 @@ window.onload = async function() {
 
     // init camera
     gCamera.position = [0.0, 0.0, -10]
-    gCamera.fov = 120.0
+    gCamera.fov = 90.0
     
     // init shader
     shaders = await requestPackedShaderSource("../shaders/simple.glsl");
@@ -75,8 +75,16 @@ window.onresize = onResize;
 function render(deltaTime, program) {
     gl.useProgram( program );
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     gInteractor.update(deltaTime)
     let aspect = canvas.width / canvas.height
+    gUniform.updateVec2("uScreenSize", flatten([canvas.width, canvas.height]))
     gUniform.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
+
+    // additive blend
+    gl.enable(gl.BLEND)
+    gl.blendEquation(gl.FUNC_ADD)
+    gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
+
     gScene.drawAll();
 }

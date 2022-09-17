@@ -28,6 +28,10 @@ function requestPackedShaderSource(url) {
     })
 }
 
+function deg2rad(deg) {
+    return (deg / 360.0) * (2 * Math.PI)
+}
+
 // common global variable
 let canvas;
 let gl;

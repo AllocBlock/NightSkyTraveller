@@ -4,16 +4,22 @@
 in vec3 aPosition;
 
 out vec3 fColor;
+out float fPointSize;
+out vec2 fPixelCenter;
 
 //uniform vec4 uColor;
-//uniform mat4 modelViewMatrix;
+uniform vec2 uScreenSize;
 uniform mat4 uViewProjMat;
 
 void main()
 {
-	gl_PointSize = 10.0;
+	fPointSize = 10.0;
+	gl_PointSize = fPointSize;
 	fColor = vec3(aPosition.xy * 0.5 + 0.5, 1.0);
-	gl_Position = uViewProjMat * vec4(aPosition, 1.0);
+	vec4 pos = uViewProjMat * vec4(aPosition, 1.0);
+
+	fPixelCenter = ((pos.xy / pos.w) * 0.5 + 0.5) * uScreenSize;
+	gl_Position = pos;
 }
 
 //! frag
@@ -21,9 +27,13 @@ void main()
 precision highp float;
 
 in vec3 fColor;
+in float fPointSize;
+in vec2 fPixelCenter;
+
 out vec4 outColor;
 
 void main()
 {
-	outColor = vec4(fColor, 1);
+	float alpha = 1.0 - (distance(fPixelCenter, gl_FragCoord.xy) * 2.0 / fPointSize);
+	outColor = vec4(fColor, alpha);
 }
