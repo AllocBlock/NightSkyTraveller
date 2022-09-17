@@ -34,15 +34,21 @@ export default class Scene {
         this.posBuffer = null
     }
 
-    bindVertexBuffer() {
-        if (!this.posBuffer) {
-            this._createPositionVertexBuffer()
-        }
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
+    createVao(program) {
+        let aPositionLoc = gl.getAttribLocation( program, "aPosition");
+        assert(aPositionLoc != -1, "Attribute location should not be -1")
+    
+        this.vao = gl.createVertexArray();
+        gl.bindVertexArray(this.vao);
+        this._bindVertexBuffer();
+    
+        gl.enableVertexAttribArray(aPositionLoc);
+        gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 0, 0);
     }
 
     drawAll() {
-        this.bindVertexBuffer()
+        assert(this.vao, "VAO is not inited, create it first!")
+        gl.bindVertexArray(this.vao);
 
         for (let objectDrawInfo of this.objectDrawInfo) {
             gl.drawArrays(objectDrawInfo.type, objectDrawInfo.offset, objectDrawInfo.count);
@@ -66,5 +72,13 @@ export default class Scene {
         this.posBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, floats, gl.STATIC_DRAW);
+    }
+    
+
+    _bindVertexBuffer() {
+        if (!this.posBuffer) {
+            this._createPositionVertexBuffer()
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.posBuffer);
     }
 }

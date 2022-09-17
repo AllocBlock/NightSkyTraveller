@@ -10,31 +10,8 @@ function loadShaderSourceFromElement(shaderId) {
 }
 
 function createScene() {
-    let pointArray = []
-
-    function appendFullscreenTriangle() {
-        pointArray.push([-1, -1])
-        pointArray.push([-1, 3])
-        pointArray.push([3, -1])
-    }
-
-    appendFullscreenTriangle();
+    let pointArray = [[-1, -1], [3, -1], [-1, 3]]
     return pointArray;
-}
-
-function createVao(program, pointArray) {
-    let aPositionLoc = gl.getAttribLocation( program, "aPosition");
-    assert(aPositionLoc != -1, "Attribute location should not be -1")
-
-    gScene.addObject(gl.TRIANGLES, pointArray);
-    gScene.bindVertexBuffer();
-
-    let vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-
-    gl.enableVertexAttribArray(aPositionLoc);
-    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 0, 0);
-    return vao;
 }
 
 function startRenderLoop(func) {
@@ -64,8 +41,8 @@ window.onload = function() {
     
     // init vao
     let pointArray = createScene()
-    let vao = createVao(program, pointArray)
-    gl.bindVertexArray(vao);
+    gScene.addObject(gl.TRIANGLES, pointArray);
+    gScene.createVao(program);
 
     // start render loop
     startRenderLoop(() => render(program, pointArray));
