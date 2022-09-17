@@ -43,7 +43,8 @@ export default class Scene {
         this._bindVertexBuffer();
     
         gl.enableVertexAttribArray(aPositionLoc);
-        gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 0, 0);
+        // TODO: how to specific?
+        gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, false, 0, 0);
     }
 
     drawAll() {

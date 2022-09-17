@@ -5,13 +5,8 @@ import Scene from "./scene.js"
 const gCamera = new PerspectiveCamera();
 const gScene = new Scene();
 
-function loadShaderSourceFromElement(shaderId) {
-    return document.getElementById(shaderId).text;
-}
-
 function createScene() {
-    let pointArray = [[-1, -1], [3, -1], [-1, 3]]
-    return pointArray;
+    gScene.addObject(gl.TRIANGLES, [[-1, -1, 0], [3, -1, 0], [-1, 3, 0]]);
 }
 
 function startRenderLoop(func) {
@@ -34,18 +29,20 @@ window.onload = function() {
     gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
     
     // init shader
-    const vertexShaderSource = loadShaderSourceFromElement("vertex-shader")
-    const fragmentShaderSource = loadShaderSourceFromElement("fragment-shader")
-    let program = webglUtils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource])
-    gl.useProgram( program );
-    
-    // init vao
-    let pointArray = createScene()
-    gScene.addObject(gl.TRIANGLES, pointArray);
-    gScene.createVao(program);
+    // const vertexShaderSource = loadShaderSourceFromElement("vertex-shader")
+    // const fragmentShaderSource = loadShaderSourceFromElement("fragment-shader")
+    requestPackedShaderSource("../shaders/simple.glsl").then(shaders => {
+        const [vertexShaderSource, fragmentShaderSource] = shaders
+        let program = webglUtils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource])
+        gl.useProgram( program );
+        
+        // init vao
+        createScene()
+        gScene.createVao(program);
 
-    // start render loop
-    startRenderLoop(() => render(program, pointArray));
+        // start render loop
+        startRenderLoop(() => render(program));
+    })
 }
 
 function render(program) {
