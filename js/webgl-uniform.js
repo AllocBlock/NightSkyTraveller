@@ -1,7 +1,12 @@
 export default class WebGLUniform {
-    constructor(program) {
+    constructor() {
+        this.program = null
+        this.attrLocationMap = new Map()
+    }
+
+    init(program) {
         this.program = program
-        this.attrLocationMap = Map()
+        this.clearLocationCache()
     }
 
     clearLocationCache() {
@@ -22,17 +27,26 @@ export default class WebGLUniform {
     }
 
     updateFloat(name, value) {
-        location = getLocation(name)
+        assert(value.length == undefined && isFinite(value), "Value is not float")
+        let location = this.getLocation(name)
         gl.uniform1f(location, value);
     }
 
     updateVec3(name, value) {
-        location = getLocation(name)
+        assert(value.length == 3, "Value is not vec3")
+        let location = this.getLocation(name)
         gl.uniform3fv(location, value);
     }
 
     updateVec4(name, value) {
-        location = getLocation(name)
+        assert(value.length == 4, "Value is not vec4")
+        let location = this.getLocation(name)
         gl.uniform4fv(location, value);
+    }
+
+    updateMat4(name, value) {
+        assert(value.length == 16, "Value is not mat4")
+        let location = this.getLocation(name)
+        gl.uniformMatrix4fv(location, false, value);
     }
 }

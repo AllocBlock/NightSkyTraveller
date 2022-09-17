@@ -162,6 +162,31 @@
   }
 
   /**
+   * scale 2 vectors3s
+   * @param {Vector3} a a vector
+   * @param {Fnumberloat} b a number
+   * @param {Vector3} dst optional vector3 to store result
+   * @return {Vector3} dst or new Vector3 if not provided
+   * @memberOf module:webgl-3d-math
+   */
+   function scaleVector(v, s, dst) {
+    dst = dst || new Float32Array(3);
+    dst[0] = v[0] * s;
+    dst[1] = v[1] * s;
+    dst[2] = v[2] * s;
+    return dst;
+  }
+
+  /**
+   * compute the length of a vector.
+   * @param {Vector3} v vector
+   * @memberOf module:webgl-3d-math
+   */
+   function length(v) {
+    return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  }
+
+  /**
    * normalizes a vector.
    * @param {Vector3} v vector to normalzie
    * @param {Vector3} dst optional vector3 to store result
@@ -1194,8 +1219,10 @@
     lookAt: lookAt,
     addVectors: addVectors,
     subtractVectors: subtractVectors,
+    scaleVector: scaleVector,
     distance: distance,
     distanceSq: distanceSq,
+    length: length,
     normalize: normalize,
     cross: cross,
     dot: dot,

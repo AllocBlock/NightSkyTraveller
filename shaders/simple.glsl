@@ -7,12 +7,13 @@ out vec3 fColor;
 
 //uniform vec4 uColor;
 //uniform mat4 modelViewMatrix;
-//uniform mat4 projectionMatrix;
+uniform mat4 uViewProjMat;
 
 void main()
 {
+	gl_PointSize = 10.0;
 	fColor = vec3(aPosition.xy * 0.5 + 0.5, 1.0);
-	gl_Position = vec4(aPosition, 1.0);
+	gl_Position = uViewProjMat * vec4(aPosition, 1.0);
 }
 
 //! frag
