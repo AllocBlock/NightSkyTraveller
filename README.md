@@ -59,6 +59,14 @@
     - 检测是否支持：http://get.webgl.org/webgl2/
     - 教程：https://webgl2fundamentals.org/webgl/lessons/zh_cn/
 
+- 视角
+  - 不宜选择常规的透视投影，因为在广角下的效果很差，和人眼差距太大
+  - 鱼眼投影，可参考：[Github - shaunlebron/blinky](https://github.com/shaunlebron/blinky)
+  - Stellarium似乎采用这样的策略
+    - 正视天空或地面时，使用360°鱼眼投影，然后根据缩放来裁剪，这样可以观察整个天空
+    - 视线水平时，使用180°鱼眼投影，也根据缩放来裁剪，似乎想保证不会同时看到两个对立的方向
+    - 在中间时，fov做插值
+
 - 星星渲染
   - 星星直径决定核心大小
   - 线性空间叠加光晕+tonemap
