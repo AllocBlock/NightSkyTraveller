@@ -73,8 +73,8 @@ window.onload = async function() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     // init camera
-    gCamera.position = [0.0, 1.0, 0.0]
-    gCamera.fov = 90.0
+    gCamera.setPos([0.0, 1.0, 0.0])
+    gCamera.setFov(90.0)
     
     // init shader
     const [programStar, uniformStar] = await createProgramAndUniform("../shaders/star.glsl");
@@ -90,7 +90,8 @@ window.onload = async function() {
     // start render loop
     function render(deltaTime) {
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+        
+        gCamera.update(deltaTime)
         gInteractor.update(deltaTime)
         const aspect = canvas.width / canvas.height
 
