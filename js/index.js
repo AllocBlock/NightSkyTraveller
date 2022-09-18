@@ -95,6 +95,22 @@ window.onload = async function() {
         gInteractor.update(deltaTime)
         const aspect = canvas.width / canvas.height
 
+        // draw star
+        {
+            gl.useProgram( programStar );
+            uniformStar.updateVec2("uScreenSize", flatten([canvas.width, canvas.height]))
+            uniformStar.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
+            // depth test but no write
+            gl.disable(gl.DEPTH_TEST);
+            gl.depthMask(false);
+
+            // additive blend
+            gl.enable(gl.BLEND)
+            gl.blendEquation(gl.FUNC_ADD)
+            gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
+            gScene.draw("stars");
+        }
+
         // draw ground
         {
             gl.useProgram( programSolid );
@@ -104,24 +120,9 @@ window.onload = async function() {
             // depth test and write
             gl.enable(gl.DEPTH_TEST);
             gl.depthMask(true);
+            gl.disable(gl.BLEND)
 
             gScene.draw("ground");
-        }
-
-        // draw star
-        {
-            gl.useProgram( programStar );
-            uniformStar.updateVec2("uScreenSize", flatten([canvas.width, canvas.height]))
-            uniformStar.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
-            // depth test but no write
-            gl.enable(gl.DEPTH_TEST);
-            gl.depthMask(false);
-
-            // additive blend
-            gl.enable(gl.BLEND)
-            gl.blendEquation(gl.FUNC_ADD)
-            gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
-            gScene.draw("stars");
         }
     }
     startRenderLoop((deltaTime) => render(deltaTime, programStar));
