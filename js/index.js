@@ -5,18 +5,31 @@ import Scene from "./scene.js"
 
 const gCamera = new PerspectiveCamera();
 const gInteractor = new Interactor();
-const gUniform = new WebGLUniform();
 const gScene = new Scene();
 
 function createScene() {
-    // gScene.addObject(gl.TRIANGLES, [[-1, -1, 0], [3, -1, 0], [-1, 3, 0]]);
+    const groundSize = 1000
+    let vertices = [
+        [-groundSize, 0, -groundSize],
+        [groundSize, 0, -groundSize],
+        [-groundSize, 0, groundSize],
+        [groundSize, 0, groundSize],
+    ]
+    gScene.addObject("ground", gl.TRIANGLES, [
+        vertices[0],
+        vertices[1],
+        vertices[2],
+        vertices[2],
+        vertices[1],
+        vertices[3],
+    ]);
 
     // random points
     let points = []
     for (let i = 0; i < 1000; ++i) {
         points.push([(Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15])
     }
-    gScene.addObject(gl.POINTS, points);
+    gScene.addObject("stars", gl.POINTS, points);
 }
 
 function startRenderLoop(func) {
@@ -38,6 +51,17 @@ function onResize() {
     }
 }
 
+async function createProgramAndUniform(url) {
+    shaders = await requestPackedShaderSource(url);
+    const [vertexShaderSource, fragmentShaderSource] = shaders
+    let program = webglUtils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource])
+
+    let uniform = new WebGLUniform();
+    uniform.init(program)
+
+    return [program, uniform]
+}
+
 window.onload = async function() {
     // init gl context
     canvas = document.getElementById( "gl-canvas" );
@@ -49,42 +73,57 @@ window.onload = async function() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     // init camera
-    gCamera.position = [0.0, 0.0, -10]
+    gCamera.position = [0.0, 1.0, 0.0]
     gCamera.fov = 90.0
     
     // init shader
-    shaders = await requestPackedShaderSource("../shaders/simple.glsl");
-    const [vertexShaderSource, fragmentShaderSource] = shaders
-    let program = webglUtils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource])
-    gl.useProgram( program );
-    gUniform.init(program)
+    const [programStar, uniformStar] = await createProgramAndUniform("../shaders/star.glsl");
+    const [programSolid, uniformSolid] = await createProgramAndUniform("../shaders/solid.glsl");
     
     // init vao
     createScene()
-    gScene.createVao(program);
+    gScene.createVao(programStar);
 
     // init interactor
     gInteractor.start(gCamera)
 
     // start render loop
-    startRenderLoop((deltaTime) => render(deltaTime, program));
+    function render(deltaTime) {
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+        gInteractor.update(deltaTime)
+        const aspect = canvas.width / canvas.height
+
+        // draw ground
+        {
+            gl.useProgram( programSolid );
+            uniformSolid.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
+            uniformSolid.updateVec3("uColor", flatten([0.2, 0.2, 0.2]))
+
+            // depth test and write
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthMask(true);
+
+            gScene.draw("ground");
+        }
+
+        // draw star
+        {
+            gl.useProgram( programStar );
+            uniformStar.updateVec2("uScreenSize", flatten([canvas.width, canvas.height]))
+            uniformStar.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
+            // depth test but no write
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthMask(false);
+
+            // additive blend
+            gl.enable(gl.BLEND)
+            gl.blendEquation(gl.FUNC_ADD)
+            gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
+            gScene.draw("stars");
+        }
+    }
+    startRenderLoop((deltaTime) => render(deltaTime, programStar));
 }
 
 window.onresize = onResize;
-
-function render(deltaTime, program) {
-    gl.useProgram( program );
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gInteractor.update(deltaTime)
-    let aspect = canvas.width / canvas.height
-    gUniform.updateVec2("uScreenSize", flatten([canvas.width, canvas.height]))
-    gUniform.updateMat4("uViewProjMat", gCamera.getViewProjMat(aspect))
-
-    // additive blend
-    gl.enable(gl.BLEND)
-    gl.blendEquation(gl.FUNC_ADD)
-    gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
-
-    gScene.drawAll();
-}

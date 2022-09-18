@@ -2,7 +2,8 @@ class Object {
     /*
      * @param pointArray, an array of vectors that contain position
      */
-    constructor(type, pointArray) {
+    constructor(name, type, pointArray) {
+        this.name = name
         this.type = type
         this.pointArray = pointArray
     }
@@ -18,20 +19,32 @@ class ObjectDrawInfo {
 
 export default class Scene {
     constructor() {
-        this.objects = []
-        this.objectDrawInfo = []
+        this.objects = new Map()
+        this.objectDrawInfo = new Map()
         this.posBuffer = null
     }
 
-    addObject(type, pointArray) {
-        this.objects.push(new Object(type, pointArray))
-        this.posBuffer = null
+    addObject(name, type, pointArray) {
+        assert(!this.objects.has(name), "Already have an object with same name")
+        this.objects.set(name, new Object(name, type, pointArray))
+        this._clearBuffer()
+    }
+
+    getObject(name) {
+        assert(this.objects.has(name), `Can not find object with name [${name}]`)
+        return this.objects.get(name)
+    }
+
+    removeObject(name) {
+        if (this.objects.has(name)) {
+            this.objects.delete(name)
+            this._clearBuffer()
+        }
     }
 
     clear() {
-        this.objects = []
-        this.objectDrawInfo = []
-        this.posBuffer = null
+        this.objects.clear()
+        this._clearBuffer()
     }
 
     createVao(program) {
@@ -51,18 +64,32 @@ export default class Scene {
         assert(this.vao, "VAO is not inited, create it first!")
         gl.bindVertexArray(this.vao);
 
-        for (let objectDrawInfo of this.objectDrawInfo) {
+        for (let [name, objectDrawInfo] of this.objectDrawInfo) {
             gl.drawArrays(objectDrawInfo.type, objectDrawInfo.offset, objectDrawInfo.count);
         }
+    }
+
+    draw(name) {
+        assert(this.objects.has(name), `Can not find object with name [${name}]`)
+        let objectDrawInfo = this.objectDrawInfo.get(name)
+        
+        assert(this.vao, "VAO is not inited, create it first!")
+        gl.bindVertexArray(this.vao);
+        gl.drawArrays(objectDrawInfo.type, objectDrawInfo.offset, objectDrawInfo.count);
+    }
+
+    _clearBuffer() {
+        this.objectDrawInfo.clear()
+        this.posBuffer = null
     }
 
     _createPositionVertexBuffer() {
         let positions = []
         let curOffset = 0
-        for (let object of this.objects) {
+        for (let [name, object] of this.objects) {
             let objectPositions = flatten(object.pointArray, false)
             let count = object.pointArray.length
-            this.objectDrawInfo.push(new ObjectDrawInfo(object.type, curOffset, count))
+            this.objectDrawInfo.set(name, new ObjectDrawInfo(object.type, curOffset, count))
             
             positions = positions.concat(objectPositions)
             curOffset += count
