@@ -9,6 +9,10 @@ import { requrestStarData } from "./star-data.js"
 const gCamera = new PerspectiveCamera();
 const gInteractor = new Interactor();
 
+function genRandColor() {
+    return [Math.random(), Math.random(), Math.random()]
+}
+
 async function createScene() {
     let scene = new Scene();
 
@@ -38,7 +42,7 @@ async function createScene() {
     let stars = await requrestStarData()
     let points = []
     for (let star of stars) {
-        points.push([ star.getDebugPos() ])
+        points.push([ star.getDebugPos(), genRandColor(), star.magnitude ])
     }
     scene.addObject("stars", gl.POINTS, points);
 
@@ -98,7 +102,9 @@ window.onload = async function() {
 
     let vaoStar = new WebGLVertexArrayObject()
     vaoStar.create(programStar, [
-        new VertexFormat("aPosition", gl.FLOAT, 3)
+        new VertexFormat("aPosition", gl.FLOAT, 3),
+        new VertexFormat("aColor", gl.FLOAT, 3),
+        new VertexFormat("aMagnitude", gl.FLOAT, 1),
     ], [ 
         scene.getObject("stars") 
     ])

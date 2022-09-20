@@ -36,14 +36,22 @@ export class WebGLVertexArrayObject {
 
         // create vertex buffer
         let vertices = []
-        let curOffset = 0
+        let curObjectOffset = 0
         for (let object of objects) {
+            // check format
+            for (let i in vertexFormats) {
+                assert(vertexFormats[i].type == gl.FLOAT, "Only support float attribute for now")
+                assert( (vertexFormats[i].compNum == 1 && (object.pointArray[0][i].length == undefined || object.pointArray[0][i].length == 1)) ||
+                    (vertexFormats[i].compNum == object.pointArray[0][i].length)
+                , "Format and data not match")
+            }
+
             let objectVertices = flatten(object.pointArray, false)
             let count = object.pointArray.length
-            this.objectDrawInfo.set(object.name, new ObjectDrawInfo(object.type, curOffset, count))
+            this.objectDrawInfo.set(object.name, new ObjectDrawInfo(object.type, curObjectOffset, count))
             
             vertices = vertices.concat(objectVertices)
-            curOffset += count
+            curObjectOffset += count
         }
 
         let floats = flatten(vertices)
@@ -56,14 +64,20 @@ export class WebGLVertexArrayObject {
         this.vao = gl.createVertexArray();
         gl.bindVertexArray(this.vao);
 
-        let locations = []
+        let stride = 0
+        let attrOffsets = []
         for (let format of vertexFormats) {
-            let location = gl.getAttribLocation( program, "aPosition");
+            attrOffsets.push(stride)
+            stride += format.compNum * 4
+        }
+
+        for (let i in vertexFormats) {
+            let format = vertexFormats[i]
+            let location = gl.getAttribLocation( program, format.name);
             assert(location != -1, "Attribute location should not be -1")
-            locations.push(location)
 
             gl.enableVertexAttribArray(location);
-            gl.vertexAttribPointer(location, format.compNum, format.type, false, 0, 0);
+            gl.vertexAttribPointer(location, format.compNum, format.type, false, stride, attrOffsets[i]);
         }
     }
 
