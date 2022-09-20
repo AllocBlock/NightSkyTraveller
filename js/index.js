@@ -3,12 +3,13 @@ import PerspectiveCamera from "./camera.js"
 import Interactor from "./interactor.js"
 import Scene from "./scene.js"
 import { requestPackedShaderSource, flatten } from "./common.js"
+import { requrestStarData } from "./star-data.js"
  
 const gCamera = new PerspectiveCamera();
 const gInteractor = new Interactor();
 const gScene = new Scene();
 
-function createScene() {
+async function createScene() {
     const groundSize = 1000
     let vertices = [
         [-groundSize, 0, -groundSize],
@@ -26,9 +27,16 @@ function createScene() {
     ]);
 
     // random points
+    // let points = []
+    // for (let i = 0; i < 1000; ++i) {
+    //     points.push([(Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15])
+    // }
+    // gScene.addObject("stars", gl.POINTS, points);
+
+    let stars = await requrestStarData()
     let points = []
-    for (let i = 0; i < 1000; ++i) {
-        points.push([(Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15])
+    for (let star of stars) {
+        points.push(star.getDebugPos())
     }
     gScene.addObject("stars", gl.POINTS, points);
 }
@@ -82,7 +90,7 @@ window.onload = async function() {
     const [programSolid, uniformSolid] = await createProgramAndUniform("../shaders/solid.glsl");
     
     // init vao
-    createScene()
+    await createScene()
     gScene.createVao(programStar);
 
     // init interactor
