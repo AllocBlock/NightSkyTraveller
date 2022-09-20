@@ -1,3 +1,5 @@
+import { assert } from "./common.js"
+
 export default class WebGLUniform {
     constructor() {
         this.program = null

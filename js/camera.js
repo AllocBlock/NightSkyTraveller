@@ -1,3 +1,5 @@
+import { assert, deg2rad } from "./common.js"
+
 function lerp(a, b, r) {
     if (a.length || b.length) {
         assert(a.length == b.length, "lerp require same data format");

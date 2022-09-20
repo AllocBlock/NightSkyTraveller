@@ -2,7 +2,8 @@ import WebGLUniform from "./webgl-uniform.js"
 import PerspectiveCamera from "./camera.js"
 import Interactor from "./interactor.js"
 import Scene from "./scene.js"
-
+import { requestPackedShaderSource, flatten } from "./common.js"
+ 
 const gCamera = new PerspectiveCamera();
 const gInteractor = new Interactor();
 const gScene = new Scene();
@@ -52,7 +53,7 @@ function onResize() {
 }
 
 async function createProgramAndUniform(url) {
-    shaders = await requestPackedShaderSource(url);
+    let shaders = await requestPackedShaderSource(url);
     const [vertexShaderSource, fragmentShaderSource] = shaders
     let program = webglUtils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource])
 

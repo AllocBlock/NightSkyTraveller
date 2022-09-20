@@ -1,3 +1,5 @@
+import { assert } from "./common.js"
+
 const EMoveState = {
     FRONT: 1,
     BACK: 2,

@@ -1,26 +1,24 @@
-function assert(value, requirement = null) {
+export function assert(value, requirement = null) {
     if (!value) {
         throw "Assert failed" + (requirement ? ": " + requirement : "");
     }
 }
 
-function flatten(v, toTypeArray = true) {
+export function flatten(v, toTypeArray = true) {
     assert(Array.isArray(v), "Array.flat target should be an array")
-    flatted = v.flat()
+    let flatted = v.flat()
     return toTypeArray ? new Float32Array(flatted) : flatted
 }
 
-function requestText(url) {
-    result = null
+export function requestText(url) {
     return fetch(url)
     .then(response => response.text())
-    .then(data => result = data);
 }
 
-function requestPackedShaderSource(url) {
+export function requestPackedShaderSource(url) {
     return requestText(url).then(source => {
         assert(source, "Failed to request shader source")
-        shaders = source.split(/\/\/\![^\n]*\n/)
+        let shaders = source.split(/\/\/\![^\n]*\n/)
         if (shaders[0] == "")
             shaders = shaders.slice(1)
         assert(shaders.length == 2, `Current shader only support two part: vert and frag, but found ${shaders.length} parts`)
@@ -28,7 +26,7 @@ function requestPackedShaderSource(url) {
     })
 }
 
-function deg2rad(deg) {
+export function deg2rad(deg) {
     return (deg / 360.0) * (2 * Math.PI)
 }
 

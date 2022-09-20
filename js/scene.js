@@ -1,3 +1,5 @@
+import { assert, flatten } from "./common.js"
+
 class Object {
     /*
      * @param pointArray, an array of vectors that contain position
