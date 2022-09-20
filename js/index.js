@@ -1,4 +1,5 @@
 import WebGLUniform from "./webgl-uniform.js"
+import { WebGLVertexArrayObject, VertexFormat } from "./webgl-vao.js"
 import PerspectiveCamera from "./camera.js"
 import Interactor from "./interactor.js"
 import Scene from "./scene.js"
@@ -7,9 +8,10 @@ import { requrestStarData } from "./star-data.js"
  
 const gCamera = new PerspectiveCamera();
 const gInteractor = new Interactor();
-const gScene = new Scene();
 
 async function createScene() {
+    let scene = new Scene();
+
     const groundSize = 1000
     let vertices = [
         [-groundSize, 0, -groundSize],
@@ -17,13 +19,13 @@ async function createScene() {
         [-groundSize, 0, groundSize],
         [groundSize, 0, groundSize],
     ]
-    gScene.addObject("ground", gl.TRIANGLES, [
-        vertices[0],
-        vertices[1],
-        vertices[2],
-        vertices[2],
-        vertices[1],
-        vertices[3],
+    scene.addObject("ground", gl.TRIANGLES, [
+        [ vertices[0] ],
+        [ vertices[1] ],
+        [ vertices[2] ],
+        [ vertices[2] ],
+        [ vertices[1] ],
+        [ vertices[3] ],
     ]);
 
     // random points
@@ -36,9 +38,11 @@ async function createScene() {
     let stars = await requrestStarData()
     let points = []
     for (let star of stars) {
-        points.push(star.getDebugPos())
+        points.push([ star.getDebugPos() ])
     }
-    gScene.addObject("stars", gl.POINTS, points);
+    scene.addObject("stars", gl.POINTS, points);
+
+    return scene
 }
 
 function startRenderLoop(func) {
@@ -90,8 +94,21 @@ window.onload = async function() {
     const [programSolid, uniformSolid] = await createProgramAndUniform("../shaders/solid.glsl");
     
     // init vao
-    await createScene()
-    gScene.createVao(programStar);
+    let scene = await createScene()
+
+    let vaoStar = new WebGLVertexArrayObject()
+    vaoStar.create(programStar, [
+        new VertexFormat("aPosition", gl.FLOAT, 3)
+    ], [ 
+        scene.getObject("stars") 
+    ])
+
+    let vaoSolid = new WebGLVertexArrayObject()
+    vaoSolid.create(programSolid, [
+        new VertexFormat("aPosition", gl.FLOAT, 3)
+    ], [ 
+        scene.getObject("ground") 
+    ])
 
     // init interactor
     gInteractor.start(gCamera)
@@ -117,7 +134,7 @@ window.onload = async function() {
             gl.enable(gl.BLEND)
             gl.blendEquation(gl.FUNC_ADD)
             gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA)
-            gScene.draw("stars");
+            vaoStar.drawAll();
         }
 
         // draw ground
@@ -131,7 +148,7 @@ window.onload = async function() {
             gl.depthMask(true);
             gl.disable(gl.BLEND)
 
-            gScene.draw("ground");
+            vaoSolid.drawAll();
         }
     }
     startRenderLoop((deltaTime) => render(deltaTime, programStar));
