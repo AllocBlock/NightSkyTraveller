@@ -1,9 +1,5 @@
 import { assert, requestText, deg2rad } from "./common.js"
 
-function ra2rad(ra) {
-    return (ra / 24.0) * (2 * Math.PI)
-}
-
 const ESpectrumType = {
     UNKNOWN: "Unknown",
     O: "O",
@@ -28,16 +24,27 @@ export class Star {
         //this.decpr = 0 // Declination Proper Motion
     }
 
-    getDebugPos() {
+    getRa24h() {
         let comp = this.ra.split(" ")
-        let raTime = parseInt(comp[0]) + parseInt(comp[1]) / 60.0 + parseFloat(comp[2]) / 3600.0
-        let raRad = ra2rad(raTime)
+        return parseInt(comp[0]) + parseInt(comp[1]) / 60.0 + parseFloat(comp[2]) / 3600.0
+    }
 
-        comp = this.dec.split(" ")
+    getDecDegree() {
+        let comp = this.dec.split(" ")
         let isPositive = (this.dec[0] == "+")
         let decDegree = parseInt(comp[0].slice(1)) + parseInt(comp[1]) / 60.0 + parseFloat(comp[2]) / 3600.0
         decDegree *= isPositive ? 1.0 : -1.0;
-        let decRad = deg2rad(decDegree)
+        return decDegree;
+    }
+
+    getJ2000() {
+        return [this.getRa24h(), this.getDecDegree()]
+    }
+
+    getDebugPos() {
+        let [ra, dec] = this.getJ2000()
+        let raRad = deg2rad(ra * 15)
+        let decRad = deg2rad(dec)
 
         const r = 10
         let y = r * Math.sin(decRad)
@@ -47,7 +54,7 @@ export class Star {
     }
 }
 
-const gBSCDatasetFileUrl = "../Dataset/bsc.tsv"
+const gBSCDatasetFileUrl = "../dataset/bsc.tsv"
 
 function pasreTSV(data) {
     let lastSharpIndex = data.lastIndexOf("#")

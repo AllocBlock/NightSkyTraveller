@@ -83,8 +83,8 @@ export default class Interactor {
 
         this.moveSpeed = 5.0
         this.viewSpeed = 1.0
-        this.mouseSpeed = 0.04
-        this.mouseWheelSpeed = 0.0003
+        this.mouseSpeed = 0.1
+        this.mouseWheelSpeed = 0.001
 
         this.keydownListener = null
         this.keyupListener = null

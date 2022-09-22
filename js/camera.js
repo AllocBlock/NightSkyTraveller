@@ -20,7 +20,7 @@ export default class PerspectiveCamera {
         this.fov = 90.0
 
         this.near = 0.001;
-        this.far = 100;
+        this.far = 10000;
 
         this.actualPosition = this.position
         this.actualTarget = this.target

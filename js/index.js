@@ -1,5 +1,6 @@
 import WebGLUniform from "./webgl-uniform.js"
 import { WebGLVertexArrayObject, VertexFormat } from "./webgl-vao.js"
+import Observer from "./observer.js"
 import PerspectiveCamera from "./camera.js"
 import Interactor from "./interactor.js"
 import Scene from "./scene.js"
@@ -7,6 +8,7 @@ import { requestPackedShaderSource, flatten } from "./common.js"
 import { requrestStarData } from "./star-data.js"
  
 const gCamera = new PerspectiveCamera();
+const gCameraHeight = 1.0;
 const gInteractor = new Interactor();
 
 function genRandColor() {
@@ -14,6 +16,10 @@ function genRandColor() {
 }
 
 async function createScene() {
+    // init observer
+    const observer = new Observer(22.555, -113.91305, 0)
+    const date = Astronomy.MakeTime(new Date());
+
     let scene = new Scene();
 
     const groundSize = 1000
@@ -42,8 +48,23 @@ async function createScene() {
     let stars = await requrestStarData()
     let points = []
     for (let star of stars) {
-        points.push([ star.getDebugPos(), genRandColor(), star.magnitude ])
+        // points.push([ star.getDebugPos(), genRandColor(), star.magnitude ])
+        let [ra, dec] = star.getJ2000()
+        let color = [1, 1, 1]
+        if (star.id == 424) { // polaris
+            color = [1, 1, 0]
+        }
+        points.push([ observer.calPosition(date, ra, dec), color, star.magnitude ])
     }
+
+    // axis
+    for (let i = 0; i < 100; ++i) {
+        let step = i / 100.0 * 10;
+        points.push([ [step, gCameraHeight, 0], [1, 0, 0], 0 ])
+        points.push([ [0, step + gCameraHeight, 0], [0, 1, 0], 0 ])
+        points.push([ [0, gCameraHeight, step], [0, 0, 1], 0 ])
+    }
+
     scene.addObject("stars", gl.POINTS, points);
 
     return scene
@@ -90,7 +111,8 @@ window.onload = async function() {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     // init camera
-    gCamera.setPos([0.0, 1.0, 0.0])
+    gCamera.setPos([0.0, gCameraHeight, 0.0], true)
+    gCamera.setTarget([0.0, gCameraHeight, -1.0], true)
     gCamera.setFov(90.0)
     
     // init shader
@@ -98,29 +120,34 @@ window.onload = async function() {
     const [programSolid, uniformSolid] = await createProgramAndUniform("../shaders/solid.glsl");
     
     // init vao
-    let scene = await createScene()
+    async function createVAO() {
+        let scene = await createScene()
 
-    let vaoStar = new WebGLVertexArrayObject()
-    vaoStar.create(programStar, [
-        new VertexFormat("aPosition", gl.FLOAT, 3),
-        new VertexFormat("aColor", gl.FLOAT, 3),
-        new VertexFormat("aMagnitude", gl.FLOAT, 1),
-    ], [ 
-        scene.getObject("stars") 
-    ])
+        let vaoStar = new WebGLVertexArrayObject()
+        vaoStar.create(programStar, [
+            new VertexFormat("aPosition", gl.FLOAT, 3),
+            new VertexFormat("aColor", gl.FLOAT, 3),
+            new VertexFormat("aMagnitude", gl.FLOAT, 1),
+        ], [ 
+            scene.getObject("stars") 
+        ])
 
-    let vaoSolid = new WebGLVertexArrayObject()
-    vaoSolid.create(programSolid, [
-        new VertexFormat("aPosition", gl.FLOAT, 3)
-    ], [ 
-        scene.getObject("ground") 
-    ])
+        let vaoSolid = new WebGLVertexArrayObject()
+        vaoSolid.create(programSolid, [
+            new VertexFormat("aPosition", gl.FLOAT, 3)
+        ], [ 
+            scene.getObject("ground")
+        ])
+
+        return [vaoStar, vaoSolid]
+    }
+    let [vaoStar, vaoSolid] = await createVAO()
 
     // init interactor
     gInteractor.start(gCamera)
 
     // start render loop
-    function render(deltaTime) {
+    async function render(deltaTime) {
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         gCamera.update(deltaTime)
