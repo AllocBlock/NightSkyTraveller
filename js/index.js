@@ -11,14 +11,22 @@ const gCamera = new PerspectiveCamera();
 const gCameraHeight = 1.0;
 const gInteractor = new Interactor();
 
+let gShiftTime = 0
+
+function getTargetTime() {
+    let date = new Date()
+    date.setTime(date.getTime() + Math.floor(gShiftTime * 60 * 60 * 1000))
+    return date 
+}
+
 function genRandColor() {
     return [Math.random(), Math.random(), Math.random()]
 }
 
 async function createScene() {
     // init observer
-    const observer = new Observer(22.555, -113.91305, 0)
-    const date = Astronomy.MakeTime(new Date());
+    const observer = new Observer(30.6, 103.5, 0)
+    const date = Astronomy.MakeTime(getTargetTime());
 
     let scene = new Scene();
 
@@ -100,6 +108,11 @@ async function createProgramAndUniform(url) {
     return [program, uniform]
 }
 
+function updateUI() {
+    const time = getTargetTime()
+    $("#ui-time").text(`时间: ${time}`)
+}
+
 window.onload = async function() {
     // init gl context
     canvas = document.getElementById( "gl-canvas" );
@@ -142,12 +155,20 @@ window.onload = async function() {
         return [vaoStar, vaoSolid]
     }
     let [vaoStar, vaoSolid] = await createVAO()
+    $("#ui-update-star").click(async () => {
+        gShiftTime += parseFloat($("#ui-shift-time").val())
+        let res = await createVAO()
+        vaoStar = res[0]
+        vaoSolid = res[1]
+    })
 
     // init interactor
     gInteractor.start(gCamera)
 
     // start render loop
     async function render(deltaTime) {
+        updateUI()
+
         gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         gCamera.update(deltaTime)

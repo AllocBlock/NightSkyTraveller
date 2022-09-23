@@ -88,6 +88,36 @@
       - 岁差和章动里，地轴不相对地球运动，因此不影响经纬度，但可能影响天体坐标系
     - 极移
       - 地轴相对地球本身移动，会造成经纬度变化
+  - 天体坐标系（celestial coordinate）
+    - https://zhuanlan.zhihu.com/p/396807910
+    - 地理坐标系 Geographic Coordinate System
+      - 自转轴：地球自转沿着的轴
+        - 两端分别是北天极和南天极
+        - 赤道：垂直于他的最大平面
+        - 子午线/经线：穿过南北天极的大圆
+        - 纬度（latitude）、经度（longitude）和高度（altitude）
+          - 纬度：与地心连线和赤道面的夹角，北半球为正，南半球为负，范围[-90°,90°]
+          - 经度：与地心连线和本初子午线的夹角，向东为正，向西为负，范围[-180°,180°]
+            - 格林威治/本初子午线（Greenwich Meridian/Prime Meridian）是指经过伦敦格林威治天文台的子午线。
+          - 高度：海拔高度，单位是米
+        - 中天：星星穿过当地子午线的时刻（也是星星最高的时刻？），同一颗星星不同地点的中天时间不同
+      - 纬度对星体可见性的影响
+        - 不同纬度可见的星体是不同的，升起和落下也是不同的
+        - 在赤道上，所有的星体都可见
+        - 在南北极，只有一半的星体可见，且可见的都是拱极星（Circumpoalr star）
+          - 拱极星
+        - 其他纬度，一部分可见，有的还是拱极星，另一部分完全不可见
+      - 天球地平和几何地平
+        - 视地平（Apparent Horizon）：在地平面上时，视角是一个半球范围
+        - 几何地平（Geometric Horizon）：站在高处时，视野范围会更大，大于一个半球
+    - 地平坐标系 Horizonal Coordinate System
+       - 以观测者所处的位置为中心，并且将观测者的视线作为基本面，也就是地平圈
+         - 地平圈：和铅垂线垂直的平面并和天球相切，也就是我们所说的天球地平（Astronomical Horizon）
+         - ![](https://pic4.zhimg.com/80/v2-cc296039a917d4bad79f8239086481bb_720w.jpg)
+         - 对比地理坐标系，也有地平经纬线，地平子午线
+         - 将星体位置投影到地平天球上，就可以用两个参数表示星体位置
+           - 方位（Azimuth）：即地平经度，简称Az，；天子午圈与天体所在的地平经圈平面的夹角，从南点（S）以顺时针方向测量。方位角的取值范围为0°～360°。
+            - 高度（Altitude）：即地平纬度，简称 h 或 Alt ; 天体和观测者的连线与地平圈的夹角或者天体的仰视角。高度的取值范围为+90° ~ -90°， 当高度为正数时，天体位于地平圈以上，也就是可见的天体，当高度为负数时，天体位于地平圈以下，也就无法观测。
   - J2000.0
     - J2000.0的“J”代表儒略历，从上文可以了解地球自转轴和春分点是不断变化的，如果坐标系以自转轴或者春分点做参考的话，则必须指定某一瞬时作为参考基准，这一时刻称为历元。J2000.0的历元就是2000年1月1.5日TBD（质心动力学时），对应的儒略日为2451545.0日。
       - 约50年更新一次，下一次更新在2050年
@@ -102,6 +132,9 @@
         - https://stackoverflow.com/questions/11957633/getting-j2000-xyz-coordinates-for-a-location-on-earth-in-python
         - Astronomy支持Observer！
           - https://astronomy.stackexchange.com/questions/34129/client-side-javascript-astronomy-libraries-which-are-not-based-on-node-js
+          - 但是要实现实时更新，需要在shader里自己实现
+    - International Celestial Reference System, ICRS -> Horizontal coordinate
+      - 
 
 ## 2 渲染
 - API
